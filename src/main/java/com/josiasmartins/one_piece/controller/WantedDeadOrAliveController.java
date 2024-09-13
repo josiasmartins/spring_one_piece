@@ -1,6 +1,7 @@
 package com.josiasmartins.one_piece.controller;
 
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,7 +37,11 @@ public class WantedDeadOrAliveController {
             ImageIO.write(combinedImage, "png", baos);
             byte[] imageBytes = baos.toByteArray();
 
-            return ResponseEntity.ok().body(imageBytes);
+            // Configura o cabeçalho da resposta para tipo de imagem
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.IMAGE_PNG);
+
+            return new ResponseEntity<>(imageBytes, headers, HttpStatus.OK);
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
