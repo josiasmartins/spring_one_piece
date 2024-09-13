@@ -42,6 +42,8 @@ public class WantedDeadOrAliveController {
             @RequestParam(value = "rewardFontSize", defaultValue = "40") float rewardFontSize) {
         try {
 
+            name = name.toUpperCase();
+
             this.validations(name);
 
             // Carregar a imagem padrão
