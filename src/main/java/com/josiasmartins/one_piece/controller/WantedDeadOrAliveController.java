@@ -1,16 +1,15 @@
 package com.josiasmartins.one_piece.controller;
 
+import com.josiasmartins.one_piece.exceptions.BadRequestException;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -42,6 +41,9 @@ public class WantedDeadOrAliveController {
             @RequestParam(value = "nameFontSize", defaultValue = "55") float nameFontSize,
             @RequestParam(value = "rewardFontSize", defaultValue = "40") float rewardFontSize) {
         try {
+
+            this.validations(name);
+
             // Carregar a imagem padrão
             BufferedImage backgroundImage = ImageIO.read(new ClassPathResource("static/imagem_procurado_onepiece.jpg").getInputStream());
 
@@ -107,7 +109,15 @@ public class WantedDeadOrAliveController {
         return combinedImage;
     }
 
-    private void addTextToImage(Graphics2D g2d, String name, String reward, int nameX, int nameY, int rewardX, int rewardY, float nameFontSize, float rewardFontSize) {
+    private void addTextToImage(Graphics2D g2d,
+                                String name,
+                                String reward,
+                                int nameX,
+                                int nameY,
+                                int rewardX,
+                                int rewardY,
+                                float nameFontSize,
+                                float rewardFontSize) {
         try {
             // Carregar a fonte personalizada
             InputStream fontStream = new ClassPathResource("static/fonts/CenturyOldStyleStd-Bold.otf").getInputStream();
@@ -189,6 +199,14 @@ public class WantedDeadOrAliveController {
         g2d.dispose();
 
         return agedImage;
+    }
+
+    public void validations(String name) {
+
+        if (name.length() > 10) {
+            throw new BadRequestException("Field name is maximum 10 characters", 400);
+        }
+
     }
 
 }
