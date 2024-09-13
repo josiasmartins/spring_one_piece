@@ -14,6 +14,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.font.FontRenderContext;
+import java.awt.font.TextLayout;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -30,11 +33,11 @@ public class WantedDeadOrAliveController {
             @RequestParam(value = "height", defaultValue = "310") int height,
             @RequestParam(value = "verticalOffset", defaultValue = "-55") int verticalOffset,
             @RequestParam(value = "name", defaultValue = "Ninja Copiador") String name,
-            @RequestParam(value = "reward", defaultValue = "300,00") String reward,
+            @RequestParam(value = "reward", defaultValue = "3,000,000.00") String reward,
             @RequestParam(value = "nameX", defaultValue = "50") int nameX,
-            @RequestParam(value = "nameY", defaultValue = "600") int nameY,
+            @RequestParam(value = "nameY", defaultValue = "568") int nameY,
             @RequestParam(value = "rewardX", defaultValue = "87") int rewardX,
-            @RequestParam(value = "rewardY", defaultValue = "673") int rewardY,
+            @RequestParam(value = "rewardY", defaultValue = "646") int rewardY,
             @RequestParam(value = "nameFontSize", defaultValue = "55") float nameFontSize,
             @RequestParam(value = "rewardFontSize", defaultValue = "40") float rewardFontSize) {
         try {
@@ -102,37 +105,55 @@ public class WantedDeadOrAliveController {
 
     private void addTextToImage(Graphics2D g2d, String name, String reward, int nameX, int nameY, int rewardX, int rewardY, float nameFontSize, float rewardFontSize) {
         try {
-            // Carregar a fonte personalizada para o nome
+            // Carregar a fonte personalizada
             InputStream fontStream = new ClassPathResource("static/fonts/CenturyOldStyleStd-Bold.otf").getInputStream();
             Font font = Font.createFont(Font.TRUETYPE_FONT, fontStream);
             Font nameFont = font.deriveFont(nameFontSize);
-            g2d.setFont(nameFont);
-        } catch (Exception e) {
-            e.printStackTrace();
-            // Em caso de falha ao carregar a fonte, usa uma fonte padrão
-            g2d.setFont(new Font("Arial", Font.BOLD, (int) nameFontSize));
-        }
-
-        // Define a cor do texto
-        g2d.setColor(Color.WHITE);
-
-        // Adiciona o texto do nome
-        g2d.drawString(name, nameX, nameY);
-
-        try {
-            // Recarregar a fonte personalizada para a recompensa
-            InputStream fontStream = new ClassPathResource("static/fonts/CenturyOldStyleStd-Bold.otf").getInputStream();
-            Font font = Font.createFont(Font.TRUETYPE_FONT, fontStream);
             Font rewardFont = font.deriveFont(rewardFontSize);
-            g2d.setFont(rewardFont);
+
+            // Adiciona o texto do nome com gradiente
+            addGradientText(g2d, name, nameX, nameY, nameFont, new Color(0x4d2605), new Color(0x1b0800));
+
+            // Adiciona o texto da recompensa com gradiente
+            addGradientText(g2d, reward, rewardX, rewardY, rewardFont, new Color(0x4d2605), new Color(0x1b0800));
+
         } catch (Exception e) {
             e.printStackTrace();
-            // Em caso de falha ao carregar a fonte, usa uma fonte padrão
-            g2d.setFont(new Font("Arial", Font.BOLD, (int) rewardFontSize));
-        }
+            // Em caso de falha ao carregar a fonte, usa uma fonte padrão e uma cor simples
+            g2d.setFont(new Font("Arial", Font.BOLD, (int) nameFontSize));
+            g2d.setColor(new Color(0x4d2605));
+            g2d.drawString(name, nameX, nameY);
 
-        // Adiciona o texto da recompensa
-        g2d.drawString(reward, rewardX, rewardY);
+            g2d.setFont(new Font("Arial", Font.BOLD, (int) rewardFontSize));
+            g2d.setColor(new Color(0x1b0800));
+            g2d.drawString(reward, rewardX, rewardY);
+        }
+    }
+
+    private void addGradientText(Graphics2D g2d, String text, int x, int y, Font font, Color startColor, Color endColor) {
+        // Configura a fonte
+        g2d.setFont(font);
+
+        // Calcula o layout do texto
+        FontRenderContext frc = g2d.getFontRenderContext();
+        TextLayout textLayout = new TextLayout(text, font, frc);
+        Rectangle2D bounds = textLayout.getBounds();
+
+        // Cria um BufferedImage para desenhar o texto com gradiente
+        BufferedImage textImage = new BufferedImage((int) bounds.getWidth(), (int) bounds.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        Graphics2D textG2D = textImage.createGraphics();
+        textG2D.setFont(font);
+
+        // Cria o gradiente
+        GradientPaint gradient = new GradientPaint(0, 0, startColor, (float) bounds.getWidth(), (float) bounds.getHeight(), endColor);
+        textG2D.setPaint(gradient);
+
+        // Adiciona o texto ao BufferedImage com gradiente
+        textG2D.drawString(text, 0, (float) -bounds.getY());
+        textG2D.dispose();
+
+        // Desenha o BufferedImage na imagem principal
+        g2d.drawImage(textImage, x, y, null);
     }
 
 }
