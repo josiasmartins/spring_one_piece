@@ -18,6 +18,7 @@ import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.RescaleOp;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -53,9 +54,12 @@ public class WantedDeadOrAliveController {
             // Sobrepor a imagem do usuário sobre a imagem padrão com deslocamento vertical
             BufferedImage combinedImage = overlayImage(backgroundImage, resizedUserImage, verticalOffset, name, reward, nameX, nameY, rewardX, rewardY, nameFontSize, rewardFontSize);
 
+            // Adiciona efeito de rasgo e envelhecimento
+            BufferedImage finalImage = addAgingEffects(combinedImage);
+
             // Converte a imagem combinada de volta para um array de bytes
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ImageIO.write(combinedImage, "png", baos);
+            ImageIO.write(finalImage, "png", baos);
             byte[] imageBytes = baos.toByteArray();
 
             // Configura o cabeçalho da resposta para tipo de imagem
@@ -154,6 +158,37 @@ public class WantedDeadOrAliveController {
 
         // Desenha o BufferedImage na imagem principal
         g2d.drawImage(textImage, x, y, null);
+    }
+
+    private BufferedImage addAgingEffects(BufferedImage image) throws IOException {
+        // Cria uma cópia da imagem original
+        BufferedImage agedImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = agedImage.createGraphics();
+        g2d.drawImage(image, 0, 0, null);
+
+        // Adiciona uma textura de papel antigo
+        BufferedImage paperTexture = ImageIO.read(new ClassPathResource("static/papel_antigo.jpg").getInputStream());
+        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 0.4f));  // Ajusta a opacidade da textura
+        g2d.drawImage(paperTexture, 0, 0, image.getWidth(), image.getHeight(), null);
+
+        // Adiciona um filtro sépia para dar um tom envelhecido
+        float[] sepia = {
+                0.272f, 0.534f, 0.131f, 0f,
+                0.349f, 0.686f, 0.168f, 0f,
+                0.393f, 0.769f, 0.189f, 0f,
+                0f, 0f, 0f, 1f
+        };
+        RescaleOp sepiaFilter = new RescaleOp(sepia, new float[4], null);
+        g2d.drawImage(agedImage, sepiaFilter, 0, 0);
+
+        // Adiciona bordas desgastadas
+        // Aqui você pode adicionar código para desenhar bordas desgastadas, se desejado
+        // Exemplo: criar uma máscara de desgaste e aplicá-la com `g2d.drawImage` e `AlphaComposite`
+
+        // Finaliza a edição da imagem
+        g2d.dispose();
+
+        return agedImage;
     }
 
 }
