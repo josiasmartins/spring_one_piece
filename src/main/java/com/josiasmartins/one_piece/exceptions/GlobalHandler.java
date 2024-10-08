@@ -1,6 +1,6 @@
 package com.josiasmartins.one_piece.exceptions;
 
-import com.josiasmartins.one_piece.models.ErrorDefault;
+import com.josiasmartins.one_piece.domain.models.ErrorDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;

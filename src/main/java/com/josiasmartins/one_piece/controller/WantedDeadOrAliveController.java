@@ -203,7 +203,7 @@ public class WantedDeadOrAliveController {
         return agedImage;
     }
 
-    public void validations(String name) {
+    private void validations(String name) {
 
         if (name.length() > 10) {
             throw new BadRequestException("Field name is maximum 10 characters", 400);

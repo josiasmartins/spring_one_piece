@@ -1,4 +1,4 @@
-package com.josiasmartins.one_piece.models;
+package com.josiasmartins.one_piece.domain.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
